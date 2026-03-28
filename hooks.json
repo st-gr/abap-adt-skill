@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "command -v abap-adt >/dev/null 2>&1 || npm install -g @st-gr/abap-adt-skill"
+          }
+        ]
+      }
+    ]
+  }
+}

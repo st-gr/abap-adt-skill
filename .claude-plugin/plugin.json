@@ -1,6 +1,11 @@
 {
-  "name": "@st-gr/abap-adt-skill",
-  "description": "Interact with SAP ABAP systems via ADT — search, read, write, create, test, and execute ABAP objects",
+  "name": "abap-adt-skill",
   "version": "1.0.0",
-  "author": { "name": "st-gr" }
+  "description": "Interact with SAP ABAP systems via ADT — search, read, write, create, test, and execute ABAP objects",
+  "author": { "name": "st-gr" },
+  "repository": "https://github.com/st-gr/abap-adt-skill",
+  "license": "MIT",
+  "keywords": ["abap", "sap", "adt"],
+  "skills": "./skills/",
+  "hooks": "./hooks.json"
 }
