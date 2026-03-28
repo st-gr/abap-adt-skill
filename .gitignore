@@ -14,6 +14,9 @@ tmp/
 SMICM-ADT-Ecipse-SAVE.txt
 SAP-ADT-SESSION-STATE-FIX.md
 
+# Local docs
+DEPLOY.md
+
 # Claude local state
 .claude/projects/
 .claude/plans/
