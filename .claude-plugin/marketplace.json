@@ -1,0 +1,23 @@
+{
+  "name": "st-gr-abap-adt",
+  "owner": {
+    "name": "st-gr"
+  },
+  "metadata": {
+    "description": "SAP ABAP ADT plugins for Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "abap-adt-skill",
+      "source": ".",
+      "description": "Interact with SAP ABAP systems via ADT — search, read, write, create, test, and execute ABAP objects",
+      "version": "1.0.0",
+      "author": { "name": "st-gr" },
+      "repository": "https://github.com/st-gr/abap-adt-skill",
+      "license": "MIT",
+      "keywords": ["abap", "sap", "adt"],
+      "category": "integrations"
+    }
+  ]
+}
