@@ -1,0 +1,24 @@
+{
+  "name": "@st-gr/abap-adt-skill",
+  "version": "1.0.0",
+  "description": "CLI for SAP ABAP ADT operations, usable standalone or as a Claude Code skill",
+  "main": "dist/index.js",
+  "bin": {
+    "abap-adt": "dist/index.js"
+  },
+  "files": ["dist/", "README.md"],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@st-gr/abap-adt-api-patched": "^7.1.1-patched.1",
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "@types/node": "^20.0.0"
+  },
+  "keywords": ["abap", "sap", "adt", "claude-code", "skill"],
+  "license": "MIT"
+}

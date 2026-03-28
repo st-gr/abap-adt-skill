@@ -1,0 +1,7 @@
+{
+  "name": "@st-gr/abap-adt-skill-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Claude Code plugin for SAP ABAP ADT operations",
+  "license": "MIT"
+}

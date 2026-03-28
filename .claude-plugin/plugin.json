@@ -1,0 +1,6 @@
+{
+  "name": "@st-gr/abap-adt-skill",
+  "description": "Interact with SAP ABAP systems via ADT — search, read, write, create, test, and execute ABAP objects",
+  "version": "1.0.0",
+  "author": { "name": "st-gr" }
+}

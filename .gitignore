@@ -1,0 +1,22 @@
+node_modules/
+dist/
+build/
+*.tgz
+
+# Reference implementations (not part of the plugin)
+sapcli/
+vscode_abap_remote_fs/
+abap-adt-api/
+
+# Workspace artifacts
+tmp/
+*.abap
+SMICM-ADT-Ecipse-SAVE.txt
+SAP-ADT-SESSION-STATE-FIX.md
+
+# Claude local state
+.claude/projects/
+.claude/plans/
+.claude/settings.json
+.claude/settings.local.json
+.claude/skills/
