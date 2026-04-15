@@ -395,6 +395,108 @@ The temp class is auto-cleaned up. Use `out->write()` for output.
 | Package | DEVC/K | `/sap/bc/adt/packages/<name>` |
 | Message Class | MSAG/N | `/sap/bc/adt/messageclass/<name>` |
 
+## Practical Patterns & Gotchas
+
+### exec — Line Length and OO Context
+
+The `--code` inline flag silently fails or errors if any single shell argument
+exceeds ~255 characters. For anything beyond a trivial one-liner, write the code
+to a file and use `--source-file`:
+```bash
+abap-adt exec --source-file /tmp/my_logic.abap
+```
+
+The exec context is an OO method body (`IF_OO_ADT_CLASSRUN~MAIN`). This means:
+- Use `out->write()` for output, not `WRITE` statements
+- No `FORM`/`ENDFORM`, `REPORT`, or `START-OF-SELECTION`
+- `IMPORT ... FROM DATABASE` must use the OO form: `IMPORT name TO var FROM DATABASE ...`
+  (the short form `IMPORT var FROM DATABASE ...` is not allowed in OO context)
+
+### Writing Classes — Combined Source Only
+
+Always write the combined DEFINITION + IMPLEMENTATION as a single file to
+`/source/main`. Writing to `/includes/definitions` and `/includes/implementations`
+separately creates duplicate `CLASS ... IMPLEMENTATION` blocks and breaks activation.
+
+```bash
+# Correct — single combined file
+abap-adt write /sap/bc/adt/oo/classes/zcl_my_class -s /tmp/combined.abap
+
+# Wrong — causes activation error
+abap-adt write /sap/bc/adt/oo/classes/zcl_my_class/includes/implementations -s /tmp/impl.abap
+```
+
+### RFC Function Calls via exec
+
+To call an RFC-enabled function module on a remote system from `exec`, use the
+`DESTINATION` addition. Parse the output by writing delimited lines with
+`out->write()`:
+
+```abap
+DATA lv_msg TYPE c LENGTH 200.
+CALL FUNCTION 'SOME_RFC_FM'
+  DESTINATION 'RFC_DEST_NAME'
+  EXPORTING  query_table = 'SOME_TABLE'
+  TABLES     ...
+  EXCEPTIONS
+    system_failure        = 1 MESSAGE lv_msg
+    communication_failure = 2 MESSAGE lv_msg
+    OTHERS = 7.
+out->write( |RC={ sy-subrc } MSG={ lv_msg }| ).
+```
+
+The `MESSAGE` addition on `system_failure`/`communication_failure` must use a
+fixed-length `TYPE c` field — `TYPE string` causes an activation error.
+
+### /BODS/RFC_READ_TABLE2 Conventions
+
+This generic table-read FM is common on SAP systems with Data Services:
+- WHERE clause uses **SQL syntax** (`=`), not ABAP keywords (`EQ`)
+- NUMC fields require **zero-padded** values: `REQUEST = '0000011333'`
+- Output table chosen by total row width (sum of field lengths):
+  ≤128 → `tblout128`, ≤512 → `tblout512`, ≤2048 → `tblout2048`, ≤8192 → `tblout8192`, >8192 → `tblout30000`
+- Output rows are **raw concatenated field values** in the order fields were requested;
+  parse by computing byte offsets from field lengths
+- Does **NOT** support a `rowcount` EXPORTING parameter — passing it causes RC=7 (OTHERS)
+- A successful call (subrc=0) with zero rows means the query ran but found nothing — not an error
+
+### Reading ABAP Cluster Tables via RFC
+
+ABAP cluster tables (like `/RSC/T_BD_2S`) store compressed internal tables that
+cannot be read directly via `RFC_READ_TABLE`. The round-trip approach:
+
+1. Read the raw row (RELID, SRTFD, SRTF2, CLUSTR, CLUSTD) via RFC
+2. Write the raw row locally with a different RELID (e.g. 'ZZ') as temporary storage
+3. `IMPORT var TO var FROM DATABASE table(ZZ) ID key` to deserialize
+4. Delete the temporary local row immediately
+5. Process the resulting internal table
+
+### Date Formatting — User Locale
+
+Use string template formatting to respect the logged-in user's date/time format
+(`SY-DATFM`):
+
+```abap
+" Locale-aware (respects user settings, e.g. MM/DD/YYYY)
+DATA(lv_date_str) = |{ sy-datum DATE = USER }|.
+DATA(lv_time_str) = |{ sy-uzeit TIME = USER }|.
+
+" Hardcoded ISO (ignores locale — avoid unless specifically needed)
+DATA(lv_iso) = |{ sy-datum+0(4) }-{ sy-datum+4(2) }-{ sy-datum+6(2) }|.
+```
+
+### DDIC Object Creation
+
+Some SAP systems restrict DDIC object creation (structures, table types, data
+elements, domains) via ADT. If `abap-adt create structure` or similar fails,
+the user may need to create DDIC objects manually via transaction SE11. The
+`abap-adt sql` command can query DDIC metadata (DD03L, DD02L, DD40L) to inspect
+existing structures:
+
+```bash
+abap-adt sql "SELECT FIELDNAME, DATATYPE, LENG FROM DD03L WHERE TABNAME = 'MY_STRUCT' AND AS4LOCAL = 'A' ORDER BY POSITION"
+```
+
 ## Error Handling
 
 - **401/403**: Authentication failed — check `ADT_USER` and `ADT_PASS`
